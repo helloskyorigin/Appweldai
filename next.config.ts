@@ -1,13 +1,17 @@
 import type { NextConfig } from "next";
 
-// Serve the same polished static site in Next.js and Firebase Hosting.
-// Keep the React scaffold for future converter development.
+// Keep the existing Next.js scaffold; public static pages are the canonical
+// no-login Appweld frontend until the actual build service is implemented.
 const nextConfig: NextConfig = {
   async rewrites() {
     return {
       beforeFiles: [
         { source: "/", destination: "/index.html" },
         { source: "/create", destination: "/create/index.html" },
+        { source: "/review", destination: "/review/index.html" },
+        { source: "/checkout", destination: "/checkout/index.html" },
+        { source: "/building", destination: "/building/index.html" },
+        { source: "/download", destination: "/download/index.html" },
         { source: "/legal/:slug", destination: "/legal/:slug.html" },
       ],
     };
