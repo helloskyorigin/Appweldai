@@ -11,8 +11,19 @@ window.addEventListener('DOMContentLoaded',async()=>{
   if(data.state!=='ready'){status.textContent=`Build is ${data.state}. Go to Build to see its live status.`;return;}
   for(const type of ['apk','aab','key-backup']){
    const a=document.getElementById('file-'+type);
-   a.href=`/api/build/${build.id}/download/${type}?token=${encodeURIComponent(build.token)}`;
-   a.setAttribute('download',type==='key-backup'?'signing-key-backup.zip':'android-app.'+type);
+   a.href='#';
+   a.addEventListener('click',async event=>{
+     event.preventDefault();if(a.dataset.working==='true')return;
+     a.dataset.working='true';const original=a.textContent;a.textContent='Downloading…';
+     try{
+       const response=await fetch(`/api/build/${build.id}/download/${type}`,{headers:{'X-Appweld-Build-Token':build.token},cache:'no-store'});
+       if(!response.ok){const problem=await response.json().catch(()=>({}));throw Error(problem.error||'File unavailable.');}
+       const object=URL.createObjectURL(await response.blob());
+       const link=document.createElement('a');link.href=object;link.download=type==='key-backup'?'signing-key-backup.zip':'android-app.'+type;
+       document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(object),30_000);
+     }catch(e){status.textContent='Download failed: '+e.message;}
+     finally{a.dataset.working='false';a.textContent=original;}
+   });
   }
   container.hidden=false;status.textContent='Files are ready. Download all three and keep your signing-key backup private. They expire in about one hour after build creation.';
  }catch(e){status.textContent='Download unavailable: '+e.message;}
