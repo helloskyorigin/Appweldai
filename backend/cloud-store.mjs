@@ -44,6 +44,18 @@ export class CloudStore {
     return {id,expires};
   }
   async status(id){if(!safeId(id))return null;const snap=await this.db.collection('appweld_jobs').doc(id).get();return snap.exists?snap.data():null;}
+  async claimPreview(id){
+    if(!safeId(id))return false;
+    const ref=this.db.collection('appweld_jobs').doc(id);
+    return this.db.runTransaction(async tx=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists)return false;
+      const j=snap.data();
+      if(j.state!=='ready'||j.expiryMs<=this.now()||(j.previewState&&j.previewState!=='not_configured'))return false;
+      tx.update(ref,{previewState:'uploading'});return true;
+    });
+  }
+
   async patch(id,fields){if(!safeId(id))throw Error('Invalid job id');await this.db.collection('appweld_jobs').doc(id).update(fields);}
   async uploadSpec(id,spec){const f=this.bucket.file(`builds/${id}/input.json`);await f.save(JSON.stringify(spec),{resumable:false,contentType:'application/json',metadata:{cacheControl:'no-store'}});}
   async deleteSpec(id){await this.bucket.file(`builds/${id}/input.json`).delete({ignoreNotFound:true});}
