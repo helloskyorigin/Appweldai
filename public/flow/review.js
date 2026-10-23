@@ -55,8 +55,8 @@ window.addEventListener('DOMContentLoaded',async () => {
     try{const cap=await fetch('/api/capabilities').then(x=>x.json());if(!cap.buildsEnabled)throw Error('Real build service is not deployed/enabled yet. Domain verification will be available when the worker is online.');
     const response=await fetch('/api/ownership/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url.href})});const data=await response.json();if(!response.ok)throw Error(data.error);
       sessionStorage.setItem('appweld.challenge',data.challengeId);
-      document.getElementById('dns-host').textContent=data.host;document.getElementById('dns-value').textContent=data.value;
-      document.getElementById('dns-instructions').hidden=false;ownerText.textContent='Add the TXT record in your DNS provider, then click Verify domain.';
+      document.getElementById('dns-host').textContent=data.host;document.getElementById('dns-value').textContent=data.value;document.getElementById('meta-value').textContent=data.metaTag;
+      document.getElementById('dns-instructions').hidden=false;ownerText.textContent='Add the DNS TXT record or HTML meta tag, then click Verify domain.';
     }catch(e){ownerText.textContent=e.message||'Unable to start verification.';begin.disabled=false;}
   });
   verify.addEventListener('click',async()=>{

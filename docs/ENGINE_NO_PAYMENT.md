@@ -7,7 +7,7 @@ Landing -> Design (`/create/`) -> Real website readiness and DNS TXT ownership (
 - User chooses app name, valid Android package ID, square 512px icon, splash-screen color and HTTPS URL.
 - Live website is shown in an embedded mobile-width frame where the website's embedding policy allows it. An external link opens the real website if not; iframe preview is not proof of Android WebView support.
 - Server performs actual HTTPS checks with DNS/IP pinning and redirect validation; some logins, payment flows and native integrations still need physical-device testing.
-- Server issues a DNS TXT challenge `_appweld.<website-host>`; only a verified owner can submit a free build.
+- Server accepts a DNS TXT challenge `_appweld.<website-host>` or a matching `<meta name="appweld-verification">` in the public homepage. Only verified owners can submit free builds.
 - Generator emits native Android API-36 source, WebView navigation, secure SSL handling, error/retry UI, file input chooser, external links, splash resources, APK and AAB, an ephemeral release signing key and key-backup ZIP.
 - Build service uses Gradle + Android SDK, returns a secret job token and short-lived per-session download links. No permanent user account, storage database or payment information.
 

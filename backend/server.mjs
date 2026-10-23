@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { inspectWebsite, normalizeWebsite } from './readiness.mjs';
+import { inspectWebsite, normalizeWebsite, resolveSafeIPv4, fetchPagePinned } from './readiness.mjs';
 
 // Private single-instance build service. Build slots and artifacts are ephemeral.
 // Before exposing to untrusted traffic configure Cloud Run max instances=1,
@@ -64,7 +64,20 @@ async function runBuild(job,spec){
  }catch(error){job.state='failed';job.stage='Build failed';job.error=String(error.message||error).slice(0,200);}
  finally{running--;}
 }
-export function makeServer({inspect=inspectWebsite,lookupTxt=dns.resolveTxt,buildRunner=runBuild}={}){
+async function verifyHomepageMeta(host,token){
+ const url=normalizeWebsite(`https://${host}/`);
+ const ip=await resolveSafeIPv4(host);
+ const response=await fetchPagePinned(url,ip,{timeout:8000});
+ if(!response.html||response.status<200||response.status>=400)return false;
+ const tags=response.html.match(/<meta\b[^>]*>/gi)||[];
+ for(const tag of tags){
+   const name=tag.match(/\bname\s*=\s*["']([^"']+)["']/i)?.[1];
+   const content=tag.match(/\bcontent\s*=\s*["']([^"']+)["']/i)?.[1];
+   if(name?.toLowerCase()==='appweld-verification'&&same(content,token))return true;
+ }
+ return false;
+}
+export function makeServer({inspect=inspectWebsite,lookupTxt=dns.resolveTxt,checkMeta=verifyHomepageMeta,buildRunner=runBuild}={}){
  return http.createServer(async(req,res)=>{
   prune();
   const origin='http://localhost';const u=new URL(req.url||'/',origin),route=u.pathname;
@@ -80,15 +93,16 @@ export function makeServer({inspect=inspectWebsite,lookupTxt=dns.resolveTxt,buil
     if(limiter(ip,'ownership',5,60*60*1000))return send(res,429,{ok:false,error:'Too many verification requests.'});
     const d=await readJSON(req,4096),url=normalizeWebsite(d.url);const id=randomBytes(18).toString('hex'),token='appweld-'+randomBytes(16).toString('hex');
     challenges.set(id,{host:url.hostname,token,expires:Date.now()+PROOF_TTL,verified:false});
-    return send(res,200,{ok:true,challengeId:id,type:'DNS_TXT',host:`_appweld.${url.hostname}`,value:token,expiresInMinutes:30});
+    return send(res,200,{ok:true,challengeId:id,type:'DNS_TXT_OR_HTML_META',host:`_appweld.${url.hostname}`,value:token,metaTag:`<meta name="appweld-verification" content="${token}">`,expiresInMinutes:30});
    }
    if(req.method==='POST'&&route==='/api/ownership/verify'){
     if(limiter(ip,'verify',12,60*60*1000))return send(res,429,{ok:false,error:'Too many verification attempts.'});
     const d=await readJSON(req,4096),c=challenges.get(d.challengeId);
     if(!c||c.expires<Date.now())return send(res,404,{ok:false,error:'Verification challenge expired. Start again.'});
-    let records;try{records=await lookupTxt(`_appweld.${c.host}`);}catch{return send(res,422,{ok:false,error:'DNS TXT record not found yet. DNS changes can take time.'});}
-    c.verified=records.some(parts=>same(parts.join(''),c.token));
-    return send(res,c.verified?200:422,c.verified?{ok:true,verified:true}:{ok:false,error:'TXT record does not match the verification value.'});
+    let verifiedDns=false;try{const records=await lookupTxt(`_appweld.${c.host}`);verifiedDns=records.some(parts=>same(parts.join(''),c.token));}catch{}
+    let verifiedMeta=false;if(!verifiedDns){try{verifiedMeta=await checkMeta(c.host,c.token);}catch{}}
+    c.verified=verifiedDns||verifiedMeta;
+    return send(res,c.verified?200:422,c.verified?{ok:true,verified:true,method:verifiedDns?'dns_txt':'html_meta'}:{ok:false,error:'No matching DNS TXT record or homepage verification meta tag was found yet.'});
    }
    if(req.method==='POST'&&route==='/api/build'){
     if(process.env.APPWELD_BUILDS_ENABLED!=='true')return send(res,503,{ok:false,error:'Android builds are not enabled on this server yet.'});

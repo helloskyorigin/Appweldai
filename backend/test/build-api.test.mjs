@@ -7,7 +7,8 @@ process.env.APPWELD_BUILDS_ENABLED='true';
 let record;
 const server=makeServer({
  inspect:async raw=>({url:raw,hostname:new URL(raw).hostname,httpStatus:200,title:'Example',mobileViewportDetected:true}),
- lookupTxt:async()=> [[record]],
+ lookupTxt:async()=> record?[[record]]:[],
+ checkMeta:async(host,token)=>token==='appweld-meta-test',
  buildRunner:async(job)=>{job.state='failed';job.error='SDK absent in mock environment';job.stage='failed';},
 });
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -19,7 +20,7 @@ test('build must be disabled without DNS ownership proof',async()=>{
 });
 test('DNS proof then start build returns token; invalid input rejected',async()=>{
  const [start,d]=await post('/api/ownership/start',{url:'https://example.org'});
- assert.equal(start,200);record=d.value;
+ assert.equal(start,200);record=d.value;assert.match(d.metaTag,/<meta name=\"appweld-verification\"/);
  const [code,proof]=await post('/api/ownership/verify',{challengeId:d.challengeId});assert.equal(code,200);assert.equal(proof.verified,true);
  const [bad,body]=await post('/api/build',{url:'https://example.org',challengeId:d.challengeId,packageName:'BAD ID'});
  assert.equal(bad,422);assert.match(body.error,/package ID/i);
