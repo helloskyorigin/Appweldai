@@ -167,3 +167,96 @@ body { overflow-x: clip; }
 
 /* Functional support-document navigation */
 .legal-related{display:flex;flex-wrap:wrap;gap:12px 19px;align-items:center;padding:25px 0 50px;margin-top:35px;border-top:1px solid #e4e8e2;font-size:12px;line-height:1.5}.legal-related>span{color:#839087;font-size:10px;letter-spacing:.09em;font-weight:750;margin-right:10px}.legal-related a{color:#516052;text-decoration:none}.legal-related a:hover{text-decoration:underline}.studio-footer-links a:hover{text-decoration:underline}@media(max-width:649px){.legal-related{padding:25px 0 30px;gap:12px 16px}.legal-related>span{width:100%}}
+
+/* Mobile finishing pass — fix clipped product visuals and intrusive navigation.
+   Desktop storytelling and tablet layout are intentionally unchanged. */
+@media (max-width: 649px) {
+  html { scroll-padding-top: 18px; }
+  /* Don't cover the product narrative while scrolling. */
+  .site-header { position: relative !important; top: auto !important; z-index: 100; }
+  .mobile-menu { top: 100%; }
+  .mobile-menu[hidden] { display: none !important; }
+  .nav-inner { height: 62px; }
+  .hero { min-height: 0; padding: 38px 0 42px; }
+  .hero h1 { font-size: clamp(36px, 9.1vw, 49px); letter-spacing: -.066em; }
+  .hero-lead { max-width: 365px; }
+  .hero-journey { margin-top: 22px; }
+  .hero-art { margin-top: 24px; }
+  .hero-canvas { height: clamp(250px, 69vw, 300px); }
+  /* Both preview devices live inside the canvas, with no cut-off content. */
+  .hero-browser { width: 64%; height: 194px; left: 4%; top: 49px; transform: rotate(-3deg); }
+  .hero-phone { right: 2%; top: 12px; transform: rotate(6deg) scale(.51); transform-origin: top right; }
+  .floating-tag { left: 4%; bottom: 11px; max-width: 58%; padding: 8px; gap: 7px; }
+  .floating-tag small { font-size: 8px; }
+  .scroll-cue { margin-top: 15px; }
+  .section-pad { padding-top: 60px; padding-bottom: 60px; }
+  .transformation { padding-top: 52px; }
+  .section-head h2, .custom-copy h2, .readiness-copy h2,
+  .delivery-header h2, .steps-title h2, .pricing-intro h2, .faq-intro h2 {
+    font-size: clamp(33px, 8.2vw, 44px); line-height: 1.14;
+  }
+  .section-head h2 span,.custom-copy h2 span,.readiness-copy h2 span,
+  .steps-title h2 span,.pricing-intro h2 span,.faq-intro h2 span { color: #808d84; }
+  .section-head { margin-bottom: 14px; }
+  .transform-scroll { height: auto !important; padding: 15px 0 22px; }
+  /* Mobile transformation is a coherent static composition; scroll effects are desktop-only. */
+  .transform-stage {
+    position: relative !important; top: auto !important; display: flex !important;
+    justify-content: space-between !important; align-items: center !important;
+    gap: 12px; width: calc(100% - 32px); height: 278px !important;
+    min-height: 0 !important; padding: 16px 15px 30px;
+    overflow: hidden; border-radius: 18px;
+  }
+  .transform-orbit { display: none !important; }
+  .transform-browser {
+    position: relative !important; flex: 1 1 auto; min-width: 0;
+    left: auto !important; top: auto !important; width: auto !important;
+    height: 191px !important; transform: none !important; opacity: 1 !important;
+    border-radius: 11px; align-self: center;
+  }
+  .transform-phone {
+    position: relative !important; flex: 0 0 110px; width: 110px !important;
+    height: 225px !important; left: auto !important; right: auto !important;
+    top: auto !important; transform: none !important; opacity: 1 !important;
+    z-index: 3; align-self: center;
+  }
+  .transform-phone .device-black {
+    position: absolute; top: 0; left: 0; width: 243px; height: 478px;
+    transform: scale(.45) !important; transform-origin: top left;
+  }
+  .stage-word { bottom: 12px !important; font-size: 9px !important; }
+  .stage-word-left { left: 9% !important; }
+  .stage-word-right { right: 8% !important; }
+  .transform-progress, .transform-arrow { display: none !important; }
+  .custom-grid, .readiness-grid, .pricing-layout, .faq-layout { gap: 28px; }
+  .custom-backdrop { height: 338px; }
+  .custom-device { transform: scale(.68); }
+  .readiness-preview { padding: 20px 15px; }
+  .delivery-content { margin-top: 25px; gap: 8px; }
+  .delivery-illustration { height: 180px; overflow: hidden; }
+  .steps-title h2 { margin-bottom: 23px; }
+  .footer-main { padding-bottom: 43px; }
+  .site-footer { padding-top: 55px; }
+  .footer-links { grid-template-columns: repeat(2,minmax(0,1fr)); column-gap: 18px; row-gap: 26px; }
+  .footer-links div:last-child { grid-column: 1 / -1; }
+  .footer-links a { line-height: 1.55; }
+}
+@media (max-width: 370px) {
+  .transform-stage { gap: 7px; padding: 14px 9px 28px; height: 262px !important; }
+  .transform-phone { flex-basis: 100px; width: 100px !important; height: 202px !important; }
+  .transform-phone .device-black { transform: scale(.41) !important; }
+  .hero-phone { right: 1%; transform: rotate(5deg) scale(.48); }
+  .hero-browser { width: 64%; }
+  .hero-journey { gap: 5px; }
+}
+/* Tablet uses the same unobstructed reading flow as a phone. */
+@media (min-width: 650px) and (max-width: 900px) {
+  html { scroll-padding-top: 18px; }
+  .site-header { position: relative !important; top: auto !important; }
+  .mobile-menu { top: 100%; }
+  .mobile-menu[hidden] { display: none !important; }
+}
+@media (max-width: 649px) {
+  /* The main benefit should remain legible outdoors/on small screens. */
+  .hero h1 span { color: #67746c; }
+}
