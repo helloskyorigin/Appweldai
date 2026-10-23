@@ -58,3 +58,17 @@ For actual Cloud E2E you must run the built API and Job images with provisioned 
 3. Implement a **genuine streamed Android session of the already-built APK** (for example Appetize with private authenticated sessions). An HTML iframe is a website preview, not Android emulation.
 4. Add per-session preview quotas, anonymized error telemetry and privacy limitations. Preview upload must not expose APK/aab publicly.
 5. Add server-side paid entitlement and only then unlock APK/AAB/signing-key backup. Payment integration stays out of scope in this phase.
+
+
+## Free owner-verified download phase — payment OFF
+
+After the Cloud API and Cloud Run Job have been deployed and tested, set
+`APPWELD_BUILDS_ENABLED=true` and `APPWELD_FREE_TEST_DOWNLOADS=true` on the API.
+An owner who passes DNS/HTML verification and holds the secret job token can
+download the *real* APK, AAB and signing-key backup when Gradle reports success.
+Other users cannot download, even if they guess a build identifier. One
+build/domain/day and a low global daily quota remain enforced.
+
+This is a real output/download integration, NOT browser-based Android emulation.
+The existing live website iframe can be tried only where embedding is permitted.
+Never label it as an Android emulator. Do not activate payment during QA.

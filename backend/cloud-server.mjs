@@ -11,7 +11,7 @@ const TYPES={apk:['android-app.apk','application/vnd.android.package-archive'],a
 const MAX_BODY=3*1024*1024;
 const eq=(a,b)=>{if(typeof a!=='string'||typeof b!=='string')return false;const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y)};
 function reply(res,status,body){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'});res.end(JSON.stringify(body));}
-function view(j){return{id:j.id,state:j.state,stage:j.stage,packageName:j.packageName,expiresAt:new Date(j.expiryMs).toISOString(),error:j.error||null,files:[],downloadsLocked:true,previewState:j.previewState||'not_configured'};}
+function view(j,freeDownloads){const unlocked=freeDownloads&&j.state==='ready';return{id:j.id,state:j.state,stage:j.stage,packageName:j.packageName,expiresAt:new Date(j.expiryMs).toISOString(),error:j.error||null,files:unlocked?['apk','aab','key-backup']:[],downloadsLocked:!unlocked,previewState:j.previewState||'not_configured'};}
 async function readJSON(req,limit=MAX_BODY){if(!String(req.headers['content-type']||'').startsWith('application/json'))throw Object.assign(Error('Use JSON content type'),{code:415});let n=0,chunks=[];for await(const part of req){n+=part.length;if(n>limit)throw Object.assign(Error('Request is too large'),{code:413});chunks.push(part)}try{return JSON.parse(Buffer.concat(chunks).toString('utf8'))}catch{throw Object.assign(Error('Malformed JSON'),{code:400})}}
 async function metaProof(host,token){const url=normalizeWebsite('https://'+host+'/');const ip=await resolveSafeIPv4(url.hostname);const page=await fetchPagePinned(url,ip,{timeout:8000});if(page.status<200||page.status>=400||!page.html)return false;return (page.html.match(/<meta\b[^>]*>/gi)||[]).some(tag=>{let n=tag.match(/\bname\s*=\s*["']([^"']+)["']/i)?.[1],v=tag.match(/\bcontent\s*=\s*["']([^"']+)["']/i)?.[1];return n?.toLowerCase()==='appweld-verification'&&eq(v,token)});}
 function checkedName(input){const value=String(input||'').trim();if(!value||value.length>28||/[\x00-\x1F]/.test(value))throw Error('App name must be 1–28 printable characters');return value}
@@ -20,11 +20,13 @@ function checkedIcon(input){if(typeof input!=='string'||!/^data:image\/png;base6
 function localLimiter(){const hits=new Map();return (key,limit,windowMs)=>{const now=Date.now(),x=hits.get(key);let h=x&&x.until>now?x:{count:0,until:now+windowMs};h.count++;hits.set(key,h);if(hits.size>4000)for(const[k,v]of hits)if(v.until<now)hits.delete(k);return h.count>limit;}}
 export function makeCloudServer({store,runJob=executeCloudRunJob,inspect=inspectWebsite,txtLookup=dns.resolveTxt,metaCheck=metaProof,now=()=>Date.now(),config=process.env}){
  const limited=localLimiter();
+ // Explicit free-test mode: only domain-verified owners holding their secret job token can download.
+ const freeDownloads=config.APPWELD_BUILDS_ENABLED==='true'&&config.APPWELD_FREE_TEST_DOWNLOADS==='true';
  return http.createServer(async(req,res)=>{
   const pathname=new URL(req.url||'/', 'http://localhost').pathname;
   const ip=req.socket.remoteAddress||'unknown';
   if(req.method==='GET'&&pathname==='/healthz')return reply(res,200,{ok:true,service:'appweld-cloud',buildsEnabled:config.APPWELD_BUILDS_ENABLED==='true'});
-  if(req.method==='GET'&&pathname==='/api/capabilities')return reply(res,200,{buildsEnabled:config.APPWELD_BUILDS_ENABLED==='true',requiresDomainVerification:true,price:0,temporaryDownloadMinutes:60,downloadsLocked:true,realAndroidPreviewAvailable:false});
+  if(req.method==='GET'&&pathname==='/api/capabilities')return reply(res,200,{buildsEnabled:config.APPWELD_BUILDS_ENABLED==='true',requiresDomainVerification:true,price:0,temporaryDownloadMinutes:60,downloadsLocked:!freeDownloads,freeTestDownloadsEnabled:freeDownloads,realAndroidPreviewAvailable:false});
   try {
     if(req.method==='POST'&&pathname==='/api/readiness'){
       if(limited('inspect:'+ip,8,60000))return reply(res,429,{ok:false,error:'Too many website checks'});
@@ -59,18 +61,17 @@ export function makeCloudServer({store,runJob=executeCloudRunJob,inspect=inspect
       const spec={url:url.href,appName,packageName,splashColor:input.splashColor,iconPngBase64:icon};
       await store.reserve({id,token,host:url.hostname,challengeId:input.challengeId,packageName});
       try{await store.uploadSpec(id,spec);await runJob(id);}catch(error){await store.patch(id,{state:'failed',stage:'Build could not be scheduled',error:'Cloud build service unavailable; retry later.'});await store.deleteSpec(id).catch(()=>{});return reply(res,503,{ok:false,error:'Unable to schedule Android build. No files were created.'});}
-      return reply(res,202,{ok:true,id,token,state:'queued',stage:'Queued',downloadsLocked:true,previewState:'not_configured'});
+      return reply(res,202,{ok:true,id,token,state:'queued',stage:'Queued',downloadsLocked:!freeDownloads,previewState:'not_configured'});
     }
     const match=pathname.match(/^\/api\/build\/([a-f0-9]{32})(?:\/(status|download\/(apk|aab|key-backup)))?$/);
     if(req.method==='GET'&&match){
       const job=await store.status(match[1]);const token=req.headers['x-appweld-build-token'];
       if(!job||job.expiryMs<=now()||!eq(job.tokenHash,hashToken(String(token||''))))return reply(res,404,{ok:false,error:'Build not found or expired'});
-      if(match[2]==='status')return reply(res,200,{ok:true,...view(job)});
+      if(match[2]==='status')return reply(res,200,{ok:true,...view(job,freeDownloads)});
       if(match[3]){
-        // No browser-accessible URL is issued before an actual payment entitlement.
-        // Private internal QA may use a separate secret; NEVER put this in frontend JS.
-        const key=config.APPWELD_QA_DOWNLOAD_KEY;
-        if(!key||key.length<24||!eq(req.headers['x-appweld-qa-key'],key))return reply(res,403,{ok:false,error:'App files are locked until the download entitlement is enabled'});
+        // Free testing is unlocked SERVER-SIDE, never by an editable browser flag.
+        // Builds require domain ownership verification and daily quotas before creation.
+        if(!freeDownloads)return reply(res,403,{ok:false,error:'Private test downloads are disabled on this server'});
         if(job.state!=='ready')return reply(res,409,{ok:false,error:'Android build not ready'});
         const [filename,mime]=TYPES[match[3]];
         const asset=await store.readArtifact(match[1],filename);

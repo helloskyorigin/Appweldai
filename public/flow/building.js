@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
    const response=await fetch(`/api/build/${build.id}/status`,{headers:{'X-Appweld-Build-Token':build.token}});
    const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Status unavailable.');
    if(data.state==='ready'){
-    stage(4,'COMPLETED');message.textContent=data.downloadsLocked ? 'Your Android build compiled successfully. Files remain private while the payment unlock and real Android preview are being connected.' : 'Your signed APK and AAB are ready for download.';button.disabled=false;button.textContent=data.downloadsLocked ? 'View build details ↗' : 'Download app files ↗';button.onclick=()=>location.assign('/download/');return;
+    stage(4,'COMPLETED');message.textContent=data.downloadsLocked ? 'Your Android build compiled, but private test downloads are currently disabled on this server. Contact support with your build ID.' : 'Your signed APK and AAB are ready for download.';button.disabled=false;button.textContent=data.downloadsLocked ? 'View build details ↗' : 'Download app files ↗';button.onclick=()=>location.assign('/download/');return;
    }
    if(data.state==='failed'){
     stage(-1,'FAILED');message.textContent=data.error||'Compilation failed. Your data has not been charged.';button.disabled=false;button.textContent='Back to Review ↗';button.onclick=()=>location.assign('/review/');return;
