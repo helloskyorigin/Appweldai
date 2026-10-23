@@ -1,0 +1,34 @@
+name: Appweld API and Android preview regression
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - 'public/flow/delivery.js'
+      - 'public/download/**'
+      - '.github/workflows/api-regression.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - 'public/flow/delivery.js'
+      - 'public/download/**'
+      - '.github/workflows/api-regression.yml'
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check frontend and API JavaScript syntax
+        run: |
+          node --check backend/cloud-server.mjs
+          node --check backend/cloud-store.mjs
+          node --check public/flow/delivery.js
+      - name: Run real API and security tests
+        run: node --test backend/test/*.test.mjs
+      - name: Check Android packaging generator
+        run: python3 -m unittest discover -s android-worker -p 'test_*.py' -v
