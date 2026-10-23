@@ -75,7 +75,6 @@ def valid_spec(spec):
 def android_java(url, color):
     java_url = json.dumps(url, ensure_ascii=True)
     java_host = json.dumps(urllib.parse.urlsplit(url).hostname, ensure_ascii=True)
-    java_color = json.dumps(color, ensure_ascii=True)
     return r'''package ai.appweld.wrapper;
 
 import android.app.Activity;
@@ -86,7 +85,9 @@ import android.net.Uri;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -94,13 +95,28 @@ import android.webkit.WebSettings;
 import android.webkit.WebResourceError;
 import android.webkit.SslErrorHandler;
 import android.net.http.SslError;
+import android.webkit.DownloadListener;
 
 public final class MainActivity extends Activity {
     private static final String HOME_URL = __URL__;
     private static final String ALLOWED_HOST = __HOST__;
+    private static final int FILE_PICKER = 6104;
     private WebView web;
     private ProgressBar loading;
+    private TextView error;
+    private ValueCallback<Uri[]> fileCallback;
 
+    private boolean isAllowed(Uri target) {
+        return "https".equalsIgnoreCase(target.getScheme()) &&
+            ALLOWED_HOST.equalsIgnoreCase(target.getHost());
+    }
+    private void openExternal(Uri target) {
+        String scheme = target.getScheme();
+        if (scheme == null || !(scheme.equals("https") || scheme.equals("http") ||
+            scheme.equals("mailto") || scheme.equals("tel"))) return;
+        try { startActivity(new Intent(Intent.ACTION_VIEW, target).addCategory(Intent.CATEGORY_BROWSABLE)); }
+        catch (Exception ignored) { }
+    }
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         getWindow().setStatusBarColor(Color.parseColor(__COLOR__));
@@ -119,36 +135,80 @@ public final class MainActivity extends Activity {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setMediaPlaybackRequiresUserGesture(true);
         settings.setSafeBrowsingEnabled(true);
+        settings.setBuiltInZoomControls(false);
+        settings.setDisplayZoomControls(false);
         web.setWebViewClient(new WebViewClient() {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                Uri target = request.getUrl();
-                if ("https".equalsIgnoreCase(target.getScheme()) && ALLOWED_HOST.equalsIgnoreCase(target.getHost())) return false;
-                try { startActivity(new Intent(Intent.ACTION_VIEW, target)); } catch (Exception ignored) { }
+                if (isAllowed(request.getUrl())) return false;
+                if (request.isForMainFrame()) openExternal(request.getUrl());
                 return true;
             }
-            @Override public void onPageFinished(WebView view, String url) { loading.setVisibility(View.GONE); }
-            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                if (request.isForMainFrame()) loading.setVisibility(View.GONE);
+            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap icon) {
+                loading.setVisibility(View.VISIBLE); error.setVisibility(View.GONE);
             }
-            @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-                handler.cancel(); // Never bypass invalid certificate errors.
-                loading.setVisibility(View.GONE);
+            @Override public void onPageFinished(WebView view, String url) { loading.setVisibility(View.GONE); }
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError failure) {
+                if (request.isForMainFrame()) showError("Could not load the website. Check your connection and tap to retry.");
+            }
+            @Override public void onReceivedHttpError(WebView view, WebResourceRequest req, android.webkit.WebResourceResponse response) {
+                if (req.isForMainFrame() && response.getStatusCode() >= 400) showError("The website returned an error. Tap to retry.");
+            }
+            @Override public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError failure) {
+                handler.cancel(); showError("Secure connection failed. The certificate was not bypassed.");
             }
         });
-        web.setWebChromeClient(new WebChromeClient());
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                try { startActivityForResult(params.createIntent(), FILE_PICKER); return true; }
+                catch (Exception e) { fileCallback = null; callback.onReceiveValue(null); return false; }
+            }
+            @Override public void onProgressChanged(WebView view, int progress) {
+                if (progress >= 100) loading.setVisibility(View.GONE);
+            }
+        });
+        web.setDownloadListener((url, userAgent, contentDisposition, mimetype, length) -> {
+            try { openExternal(Uri.parse(url)); } catch (Exception ignored) { }
+        });
         root.addView(web, new FrameLayout.LayoutParams(-1, -1));
         loading = new ProgressBar(this);
-        FrameLayout.LayoutParams center = new FrameLayout.LayoutParams(90, 90, android.view.Gravity.CENTER);
+        FrameLayout.LayoutParams center = new FrameLayout.LayoutParams(82, 82, android.view.Gravity.CENTER);
         root.addView(loading, center);
+        error = new TextView(this);
+        error.setTextColor(Color.rgb(43, 52, 48));
+        error.setTextSize(16);
+        error.setGravity(android.view.Gravity.CENTER);
+        error.setPadding(32, 32, 32, 32);
+        error.setBackgroundColor(Color.WHITE);
+        error.setVisibility(View.GONE);
+        error.setOnClickListener(v -> web.reload());
+        root.addView(error, new FrameLayout.LayoutParams(-1, -1));
         setContentView(root);
         web.loadUrl(HOME_URL);
+    }
+    private void showError(String message) {
+        loading.setVisibility(View.GONE);
+        error.setText(message);
+        error.setVisibility(View.VISIBLE);
+    }
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == FILE_PICKER && fileCallback != null) {
+            fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
+            fileCallback = null;
+        }
     }
     @Override public void onBackPressed() {
         if (web != null && web.canGoBack()) web.goBack(); else super.onBackPressed();
     }
-    @Override protected void onDestroy() { if (web != null) { web.destroy(); web = null; } super.onDestroy(); }
+    @Override protected void onDestroy() {
+        if (fileCallback != null) { fileCallback.onReceiveValue(null); fileCallback = null; }
+        if (web != null) { web.destroy(); web = null; }
+        super.onDestroy();
+    }
 }
-'''.replace('__URL__', java_url).replace('__HOST__', java_host).replace('__COLOR__',java_color)
+'''.replace('__URL__', java_url).replace('__HOST__', java_host).replace('__COLOR__',json.dumps(color))
 
 
 def prepare_project(spec, folder):
@@ -163,11 +223,18 @@ def prepare_project(spec, folder):
     (mipmap / 'ic_launcher.png').write_bytes(info['icon'])
     from xml.sax.saxutils import escape
     (values / 'strings.xml').write_text('<resources><string name="app_name">'+escape(info['appName'])+'</string></resources>')
+    (values / 'colors.xml').write_text('<resources><color name="splash_color">'+info['splashColor']+'</color></resources>')
     (values / 'styles.xml').write_text('<resources><style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">'
-        '<item name="android:windowLightStatusBar">true</item><item name="android:windowActionModeOverlay">true</item></style></resources>')
+        '<item name="android:windowLightStatusBar">false</item><item name="android:windowBackground">@color/splash_color</item></style></resources>')
+    versions31 = project / 'app/src/main/res/values-v31'
+    versions31.mkdir(parents=True, exist_ok=True)
+    (versions31 / 'styles.xml').write_text('<resources><style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">'
+        '<item name="android:windowSplashScreenBackground">@color/splash_color</item>'
+        '<item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>'
+        '<item name="android:windowLightStatusBar">false</item></style></resources>')
     (project / 'app/src/main/AndroidManifest.xml').write_text('''<manifest xmlns:android="http://schemas.android.com/apk/res/android">
  <uses-permission android:name="android.permission.INTERNET"/>
- <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:usesCleartextTraffic="false" android:allowBackup="false">
+ <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:usesCleartextTraffic="false" android:allowBackup="false" android:enableOnBackInvokedCallback="false">
    <activity android:name="ai.appweld.wrapper.MainActivity" android:exported="true"><intent-filter>
    <action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/>
    </intent-filter></activity></application></manifest>''')
@@ -197,7 +264,7 @@ android {
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
 '''.replace('__PACKAGE__', info['packageName']))
-    meta = {'appName':info['appName'],'url':info['url'],'packageName':info['packageName'],'targetSdk':36,'minimumSdk':26}
+    meta = {'appName':info['appName'],'url':info['url'],'packageName':info['packageName'],'targetSdk':36,'minimumSdk':26,'splashColor':info['splashColor']}
     (target / 'build-metadata.json').write_text(json.dumps(meta,indent=2))
     return project, meta
 

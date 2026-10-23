@@ -1,0 +1,15 @@
+/* Real preview & build controls — separate from locked landing styles. */
+.preview-tabs{display:flex;gap:8px;border-bottom:1px solid #dfe6dc;padding:12px 0;margin-top:12px}
+.preview-tabs button{border:1px solid transparent;background:transparent;color:#66736a;padding:10px 16px;border-radius:12px;font:700 12px/1.2 inherit;cursor:pointer}
+.preview-tabs button.is-active{background:#1c2620;color:#fff}
+.web-preview-live[hidden],.simple-device-space[hidden],.actual-artifacts[hidden],#dns-instructions[hidden]{display:none!important}
+.web-preview-live{padding:16px 0;text-align:center}
+.web-preview-phone{margin:10px auto 14px;width:min(100%,340px);overflow:hidden;border:7px solid #202723;border-radius:28px;background:#fff;box-shadow:0 16px 50px #1c2b201a}
+.web-preview-address{padding:12px;font-size:11px;color:#617067;background:#f8faf7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.web-preview-phone iframe{display:block;width:100%;height:min(65vh,545px);border:0;background:#fff}
+.web-preview-live p{max-width:390px;margin:8px auto;color:#68756c;font-size:12px;line-height:1.6}
+.web-preview-live a{font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:4px}
+.dns-value{display:block;overflow-wrap:anywhere;white-space:pre-wrap;padding:11px;border:1px solid #dce3d8;border-radius:8px;background:#f5f7f3;margin:7px 0 13px;font:12px/1.5 ui-monospace,monospace}
+.actual-artifacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:20px 0}
+.actual-artifacts a{justify-content:center;min-width:0;text-align:center;white-space:normal}
+@media(max-width:700px){.actual-artifacts{grid-template-columns:1fr}.preview-tabs button{flex:1}.web-preview-phone{width:min(100%,330px)}.web-preview-phone iframe{height:475px}}

@@ -1,0 +1,57 @@
+name: Android real-build smoke test
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'android-worker/**'
+      - '.github/workflows/android-build-smoke.yml'
+jobs:
+  compile-sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Android SDK 36
+        run: sdkmanager 'platforms;android-36' 'build-tools;36.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.13'
+      - name: Unit tests
+        run: python -m unittest discover -s android-worker -p 'test_*.py' -v
+      - name: Generate deterministic sample project
+        run: |
+          PYTHONPATH=android-worker python - <<'PY'
+          import json
+          from pathlib import Path
+          from test_worker import example_png
+          spec={'url':'https://example.org','appName':'Appweld Test','splashColor':'#D8E6B5','packageName':'ai.appweld.smoke.test','iconPngBase64':example_png()}
+          Path('/tmp/appweld-smoke.json').write_text(json.dumps(spec))
+          PY
+          python android-worker/build.py /tmp/appweld-smoke.json /tmp/appweld-out --prepare-only
+      - name: Ephemeral release signing
+        run: |
+          keytool -genkeypair -noprompt -storetype PKCS12 -keystore /tmp/appweld-smoke.p12 -alias appweld -keyalg RSA -keysize 3072 -validity 3 -dname 'CN=Temporary CI Test' -storepass smokeOnlyTest123 -keypass smokeOnlyTest123
+          echo 'APPWELD_KEYSTORE_PATH=/tmp/appweld-smoke.p12' >> "$GITHUB_ENV"
+          echo 'APPWELD_KEY_PASSWORD=smokeOnlyTest123' >> "$GITHUB_ENV"
+      - name: Actually compile APK and AAB
+        run: gradle --no-daemon --console plain --project-dir /tmp/appweld-out/android :app:assembleRelease :app:bundleRelease
+      - name: Validate actual output
+        run: |
+          test -s /tmp/appweld-out/android/app/build/outputs/apk/release/app-release.apk
+          test -s /tmp/appweld-out/android/app/build/outputs/bundle/release/app-release.aab
+          echo 'APK and AAB compiled'
+      - name: Upload test files (NOT suitable for app store)
+        uses: actions/upload-artifact@v4
+        with:
+          name: appweld-compiled-demo
+          path: |
+            /tmp/appweld-out/android/app/build/outputs/apk/release/app-release.apk
+            /tmp/appweld-out/android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 1

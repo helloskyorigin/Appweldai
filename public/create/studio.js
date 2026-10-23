@@ -5,12 +5,12 @@ window.addEventListener('DOMContentLoaded', () => {
   const url = $('website');
   const name = $('app-name');
   const color = $('splash-color');
-  const fileInput = $('app-icon');
+  const fileInput = $('app-icon'); const packageInput=$('package-id');
   const saved = U.read();
   const query = new URLSearchParams(location.search).get('url');
   const resolvedUrl = query && U.validate(query);
   url.value = resolvedUrl ? resolvedUrl.href : saved.url || '';
-  name.value = saved.name || '';
+  name.value = saved.name || '';packageInput.value=saved.packageName||'';
   color.value = saved.color || '#D8E6B5';
   let iconData = saved.icon || '';
   let iconFileName = saved.iconName || '';
@@ -22,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
     return lum > 0.24 ? '#223226' : '#fff';
   };
   function current() {
-    return {url: url.value.trim(), name: name.value.trim(), color: color.value.toUpperCase(), icon: iconData, iconName: iconFileName};
+    return {url: url.value.trim(), name: name.value.trim(), packageName: packageInput.value.trim(), color: color.value.toUpperCase(), icon: iconData, iconName: iconFileName};
   }
   function validIcon() { return /^data:image\/png;base64,/.test(iconData); }
   function render() {
@@ -65,6 +65,11 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   function clearFieldError(field, id) {field.removeAttribute('aria-invalid'); $(id).textContent = '';}
   url.addEventListener('input', () => {clearFieldError(url, 'url-error'); render();});
+  packageInput.addEventListener('input',()=>{clearFieldError(packageInput,'package-error');render();});
+  const tabSplash=$('tab-splash'),tabSite=$('tab-site'),frame=$('site-frame');
+  function setTab(which){const web=which==='web';$('splash-container').hidden=web;$('web-preview-live').hidden=!web;tabSplash.classList.toggle('is-active',!web);tabSite.classList.toggle('is-active',web);tabSplash.setAttribute('aria-pressed',String(!web));tabSite.setAttribute('aria-pressed',String(web));if(web){const v=U.validate(url.value);if(v){frame.src=v.href;$('site-open').href=v.href;$('live-preview-host').textContent=v.hostname;}}}
+  tabSplash.addEventListener('click',()=>setTab('splash'));tabSite.addEventListener('click',()=>setTab('web'));
+  let previewHost='';url.addEventListener('change',()=>{const v=U.validate(url.value);if(v&&v.hostname!==previewHost){previewHost=v.hostname;if(tabSite.getAttribute('aria-pressed')==='true')frame.src=v.href;}});
   name.addEventListener('input', () => {clearFieldError(name, 'name-error'); render();});
   color.addEventListener('input', render);
   document.querySelectorAll('.color-choice').forEach(btn => btn.addEventListener('click', () => {color.value = btn.dataset.color; render();}));
@@ -78,12 +83,12 @@ window.addEventListener('DOMContentLoaded', () => {
       await new Promise((resolve, reject) => {picture.onload = resolve;picture.onerror = reject;picture.src = source;});
       if (picture.naturalWidth < 512 || picture.naturalHeight < 512 || Math.abs(picture.naturalWidth - picture.naturalHeight) > 2)
         throw Error('Your icon needs to be square and at least 512 × 512 pixels.');
-      const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
+      const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
       const ctx = canvas.getContext('2d');
       if (!ctx) throw Error('This browser cannot process the icon. Try another image.');
-      ctx.clearRect(0,0,256,256);
-      ctx.drawImage(picture, 0, 0, 256, 256);
-      return canvas.toDataURL('image/png');
+      ctx.clearRect(0,0,512,512);
+      ctx.drawImage(picture, 0, 0, 512, 512);
+      const output=canvas.toDataURL('image/png');if(output.length>2_800_000)throw Error('Icon image is too complex for a 2 MB PNG. Try a simpler square logo.');return output;
     } finally {URL.revokeObjectURL(source);}
   }
   fileInput.addEventListener('change', async () => {
@@ -112,6 +117,10 @@ window.addEventListener('DOMContentLoaded', () => {
     if (!name.value.trim()) {
       $('name-error').textContent = 'Add a name for your Android app.';
       name.setAttribute('aria-invalid', 'true');name.focus();return;
+    }
+    if(!/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*){2,}$/.test(packageInput.value.trim())){
+      $('package-error').textContent='Enter a package ID like com.yourbrand.app (lowercase).';
+      packageInput.setAttribute('aria-invalid','true');packageInput.focus();return;
     }
     if (!validIcon()) {
       $('icon-error').textContent = 'Upload a square app icon (minimum 512 × 512 px) to continue.';

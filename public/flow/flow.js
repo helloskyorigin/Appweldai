@@ -1,7 +1,7 @@
 'use strict';
 window.AppweldUI = (() => {
   const KEY = 'appweld.preview.v1';
-  const initial = { url:'', name:'', color:'#D8E6B5', status:'dark', icon:'' };
+  const initial = { url:'', name:'', color:'#D8E6B5', status:'dark', icon:'', packageName:'' };
   function read() { try { return {...initial,...JSON.parse(sessionStorage.getItem(KEY) || '{}')}; } catch { return {...initial}; } }
   function save(patch) { const next={...read(),...patch}; try {sessionStorage.setItem(KEY,JSON.stringify(next));} catch {} return next; }
   function validate(raw) {
