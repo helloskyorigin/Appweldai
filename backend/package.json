@@ -1,1 +1,12 @@
-{"name":"appweld-readiness-api","private":true,"type":"module","engines":{"node":">=22"},"scripts":{"start":"node server.mjs","test":"node --test test/*.test.mjs"}}
+{
+  "name":"appweld-engine",
+  "private":true,
+  "type":"module",
+  "engines":{"node":">=22"},
+  "scripts":{"start":"node server.mjs","start:cloud":"node cloud-server.mjs","test":"node --test test/*.test.mjs"},
+  "dependencies":{
+    "@google-cloud/firestore":"^7.11.0",
+    "@google-cloud/storage":"^7.17.0",
+    "google-auth-library":"^9.15.1"
+  }
+}

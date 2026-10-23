@@ -9,6 +9,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
   const response=await fetch(`/api/build/${build.id}/status`,{headers:{'X-Appweld-Build-Token':build.token}});
   const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||'Build not found.');
   if(data.state!=='ready'){status.textContent=`Build is ${data.state}. Go to Build to see its live status.`;return;}
+  if(data.downloadsLocked!==false){container.hidden=true;status.textContent='Your Android build is complete. APK, AAB and signing key are private while the interactive Android preview and $9 download unlock are being prepared. No payment is being collected.';return;}
   for(const type of ['apk','aab','key-backup']){
    const a=document.getElementById('file-'+type);
    a.href='#';
