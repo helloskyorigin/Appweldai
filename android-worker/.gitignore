@@ -1,0 +1,9 @@
+*.p12
+*.jks
+*.keystore
+spec.json
+out/
+dist/
+__pycache__/
+.gradle/
+**/build/
