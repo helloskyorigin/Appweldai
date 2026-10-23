@@ -1,0 +1,63 @@
+/* Appweld — trustworthy, single-brand web-to-Android storytelling.
+   Same example website is shown in both contexts; no simulated live conversion. */
+.hero-art{width:100%;max-width:1110px;margin:clamp(42px,6vw,78px) auto 0;min-width:0}
+.conversion-hero{padding:clamp(18px,3.5vw,42px);background:linear-gradient(145deg,#eef2eb,#e7ede7 54%,#eef1ed);border:1px solid #e0e8de;border-radius:28px;overflow:hidden;isolation:isolate}
+.comparison-intro{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:30px}
+.comparison-intro .kicker{font-size:10px;letter-spacing:.14em;color:#6d7e70}
+.comparison-sample{font-size:10px;letter-spacing:.11em;color:#86938a;font-weight:700}
+.comparison-grid{display:grid;grid-template-columns:minmax(0,1.48fr) minmax(42px,.17fr) minmax(0,.85fr);align-items:center;gap:clamp(10px,1.6vw,20px);min-width:0}
+.comparison-panel{min-width:0;display:flex;flex-direction:column;align-items:center;gap:14px}
+.comparison-label{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;font-size:11px;font-weight:800;letter-spacing:.115em;color:#4b594e;text-align:center;line-height:1.3}
+.comparison-number{font:800 10px/1 var(--sans);padding:8px 9px;border:1px solid #bfcbc0;border-radius:8px;letter-spacing:0;color:#556356}
+.comparison-browser{width:100%;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 24px 55px #293b2c1d;border:1px solid #dfe5dd;min-width:0}
+.comparison-browser-bar{height:35px;display:flex;gap:8px;align-items:center;padding:0 13px;background:#fff;border-bottom:1px solid #e3e8e0}
+.browser-controls{display:flex;gap:5px;flex:0 0 auto}.browser-controls i{width:7px;height:7px;background:#d5dcd4;border-radius:50%}.comparison-url{font-size:11px;color:#79867b;margin:auto;text-align:center}.browser-open{font-size:15px;color:#6c7a6e}
+.sample-page{height:310px;min-width:0;padding:clamp(15px,2.4vw,31px);background:#f6f4ef;display:flex;flex-direction:column;overflow:hidden;color:#212b26}
+.sample-page-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;white-space:nowrap}.sample-wordmark{font:800 clamp(18px,2.1vw,25px)/1 var(--sans);letter-spacing:-.08em}.sample-registered{font-size:.34em;vertical-align:top;letter-spacing:0}.sample-nav-links{color:#687368;font-size:clamp(8px,.9vw,11px)}
+.sample-page-main{margin:auto 0;display:flex;flex-direction:column;align-items:flex-start;gap:13px}.sample-eyebrow{font-size:clamp(7px,.83vw,10px);font-weight:700;letter-spacing:.18em;color:#6e7a6e}.sample-headline{font:800 clamp(29px,4vw,56px)/1.04 var(--sans);letter-spacing:-.07em}.sample-headline em{color:#83b37f;font-style:normal}.sample-cta{background:#24382c;color:#fff;font-size:clamp(8px,1vw,11px);font-weight:700;padding:12px 16px;white-space:nowrap}.sample-page-bottom{padding-top:12px;border-top:1px solid #d6ddd3;font-size:9px;letter-spacing:.1em;color:#778178}
+.comparison-middle{display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;color:#35533b;align-self:center;padding-top:8px}.comparison-middle>span{display:grid;place-items:center;width:clamp(35px,4vw,49px);height:clamp(35px,4vw,49px);border-radius:50%;background:#fff;border:1px solid #cad9c7;font-size:23px;box-shadow:0 4px 16px #43513e0e}.comparison-middle small{font-size:9px;letter-spacing:.1em;font-weight:800;color:#788a77}
+.comparison-phone{width:clamp(156px,18vw,211px);flex:none;max-width:100%;filter:drop-shadow(0 21px 18px #2c3c2e25)}
+.comparison-phone-shell{background:#1c2522;border:4px solid #313c34;border-radius:36px;padding:7px;position:relative;aspect-ratio: .525;box-shadow:inset 0 0 0 1px #63716a;}
+.comparison-camera{position:absolute;top:9px;left:50%;transform:translateX(-50%);height:11px;width:27%;background:#151b18;border-radius:0 0 9px 9px;z-index:2}
+.comparison-phone-inner{height:100%;width:100%;overflow:hidden;border-radius:25px;display:flex;flex-direction:column;background:#f6f4ef}
+.comparison-status{height:25px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:6px 13px 0;font-weight:800;font-size:9px;color:#29352e}
+.sample-page-mobile{flex:1;min-height:0;height:auto;padding:14px 12px 7px}.sample-page-mobile .sample-wordmark{font-size:20px}.sample-page-mobile .sample-nav-links{font-size:9px}.sample-page-mobile .sample-page-main{gap:12px}.sample-page-mobile .sample-eyebrow{font-size:7px;letter-spacing:.11em}.sample-page-mobile .sample-headline{font-size:clamp(20px,2.75vw,31px);line-height:1.07}.sample-page-mobile .sample-cta{font-size:8px;padding:11px 10px}.sample-page-mobile .sample-page-bottom{font-size:6px;letter-spacing:.01em;padding-top:9px}
+.comparison-home{width:29%;height:4px;border-radius:10px;background:#29352e;align-self:center;flex:none;margin:6px auto}
+.comparison-app-name{display:flex;align-items:center;gap:10px;justify-content:center;min-height:39px}
+.comparison-app-icon{width:34px;height:34px;border-radius:9px;background:#24372b;color:#d8edd3;display:grid;place-items:center;font:800 23px/1 var(--sans);letter-spacing:-.08em;flex:none}.comparison-app-icon span{font-size:7px;vertical-align:top;align-self:start;margin-top:6px}
+.comparison-app-name b,.comparison-app-name small{display:block}.comparison-app-name b{font-size:12px}.comparison-app-name small{color:#708074;font-size:10px;margin-top:2px}
+.conversion-disclaimer{font-size:12px;line-height:1.6;color:#748178;text-align:center;margin:17px auto 0;max-width:640px}
+/* The next section explains what changes rather than showing an unrelated brand. */
+.transformation{background:#f7f9f5;padding:clamp(76px,9vw,125px) 0 clamp(78px,10vw,140px);overflow:hidden}
+.story-intro{max-width:850px;text-align:center;margin-bottom:clamp(42px,5vw,78px)}
+.story-intro h2{font:700 clamp(40px,5vw,72px)/1.11 var(--sans);letter-spacing:-.07em;margin:21px auto}.story-intro h2 span{color:#84948a}.story-intro p{font-size:16px;line-height:1.85;max-width:635px;margin:0 auto;color:#647368}
+.story-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(48px,8vw,120px)}
+.story-copy{min-width:0}.story-step{display:grid;grid-template-columns:38px minmax(0,1fr);gap:23px;padding:28px 0;border-top:1px solid #d7e0d5}.story-step:last-child{border-bottom:1px solid #d7e0d5}.story-step>span{font:800 13px/1.5 var(--sans);color:#849786}.story-step h3{font:700 clamp(19px,2vw,26px)/1.25 var(--sans);letter-spacing:-.045em;margin:0 0 8px}.story-step p{font-size:14px;line-height:1.8;color:#657569;margin:0}
+.story-device-area{background:linear-gradient(143deg,#e5ede3,#edf3e9);border:1px solid #e0e9dd;border-radius:26px;min-height:570px;padding:30px 24px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:24px;min-width:0}
+.story-stage-label{font-weight:800;letter-spacing:.14em;font-size:11px;color:#677967;text-align:center}
+.story-device{width:211px;filter:drop-shadow(0 25px 25px #29362b30)}
+.story-installed{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #dde5dc;padding:12px 15px;border-radius:14px;box-shadow:0 10px 20px #26352908;width:min(100%,285px)}
+.story-installed strong,.story-installed small{display:block}.story-installed strong{font:700 13px var(--sans)}.story-installed small{font-size:10px;color:#718074;margin-top:3px}.story-installed-check{font-size:13px;color:#5e9163;margin-left:auto;background:#e7f3e1;width:25px;height:25px;display:grid;place-items:center;border-radius:50%}
+@media(min-width:901px){
+ .conversion-hero .comparison-panel-web{align-items:stretch}
+ @supports(animation-timeline: view()){
+  .story-device{animation:story-device-enter linear both;animation-timeline:view();animation-range:entry 0% cover 33%}
+  @keyframes story-device-enter{from{opacity:.83;transform:translateY(17px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+ }
+}
+@media(min-width:650px) and (max-width:900px){
+ .conversion-hero{padding:26px}.comparison-grid{grid-template-columns:minmax(0,1.3fr) 30px minmax(0,.8fr);gap:10px}.comparison-browser .sample-page{height:255px}.comparison-phone{width:160px}.comparison-label{font-size:9px}.comparison-intro{gap:10px}.comparison-sample{font-size:8px}
+ .sample-page-main{gap:10px}.sample-headline{font-size:clamp(25px,4vw,36px)}.story-layout{grid-template-columns:1fr 1fr;gap:30px}.story-device-area{min-height:520px}.story-device{width:177px}
+}
+@media(max-width:649px){
+ .hero-art{margin:31px auto 0}.conversion-hero{padding:19px 16px 24px;border-radius:19px}.comparison-intro{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;margin-bottom:24px}.comparison-intro .kicker{font-size:9px;letter-spacing:.12em}.comparison-sample{font-size:9px}
+ .comparison-grid{display:flex;flex-direction:column;align-items:center;gap:18px}.comparison-panel{width:100%;gap:10px}.comparison-label{justify-content:flex-start;font-size:10px;letter-spacing:.11em}.comparison-number{padding:6px 8px}
+ .comparison-browser{width:100%}.comparison-browser-bar{height:31px}.sample-page{height:195px;padding:13px 16px}.sample-wordmark{font-size:21px}.sample-nav-links{font-size:9px}.sample-page-main{gap:8px}.sample-eyebrow{font-size:8px}.sample-headline{font-size:34px}.sample-cta{padding:9px 11px;font-size:9px}.sample-page-bottom{font-size:8px;padding-top:8px}
+ .comparison-middle{gap:2px;padding:0}.comparison-middle>span{transform:rotate(90deg);width:32px;height:32px;font-size:20px}.comparison-middle small{font-size:8px}
+ .comparison-panel-app{align-items:center}.comparison-panel-app .comparison-label{align-self:stretch}.comparison-phone{width:162px}.sample-page-mobile{height:auto;padding:12px 10px 6px}.sample-page-mobile .sample-wordmark{font-size:17px}.sample-page-mobile .sample-nav-links{font-size:8px}.sample-page-mobile .sample-eyebrow{font-size:6px}.sample-page-mobile .sample-headline{font-size:24px}.sample-page-mobile .sample-cta{font-size:7px;padding:9px}.sample-page-mobile .sample-page-bottom{font-size:6px}
+ .conversion-disclaimer{font-size:11px;max-width:360px;margin:12px auto 0}
+ .transformation{padding:68px 0 78px}.story-intro{margin-bottom:32px}.story-intro h2{font-size:clamp(33px,8.4vw,46px);margin:15px auto}.story-intro p{font-size:14px;line-height:1.7}
+ .story-layout{display:flex;flex-direction:column;gap:30px;align-items:stretch}.story-step{grid-template-columns:26px minmax(0,1fr);gap:13px;padding:19px 0}.story-step h3{font-size:20px}.story-step p{font-size:13px}.story-device-area{min-height:490px;padding:24px 18px;gap:17px}.story-device{width:173px}.story-stage-label{font-size:9px}.story-installed{max-width:270px}
+}
+@media(max-width:359px){.comparison-browser .sample-headline{font-size:29px}.comparison-phone{width:152px}.story-intro h2{font-size:32px}.conversion-hero{padding:14px}.story-device{width:165px}}
+@media(prefers-reduced-motion:reduce){.story-device{animation:none!important;transition:none!important}}
