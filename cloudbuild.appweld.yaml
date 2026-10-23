@@ -1,0 +1,17 @@
+# Appweld API + Android build worker. Run with:
+# gcloud builds submit --config cloudbuild.appweld.yaml --substitutions=_REGION=asia-south1 .
+substitutions:
+  _REGION: asia-south1
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build','-f','backend/Dockerfile.cloud','-t','${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-api:latest','.']
+  - name: gcr.io/cloud-builders/docker
+    args: ['push','${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-api:latest']
+  - name: gcr.io/cloud-builders/docker
+    args: ['build','-f','android-worker/Dockerfile.cloud','-t','${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-worker:latest','.']
+  - name: gcr.io/cloud-builders/docker
+    args: ['push','${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-worker:latest']
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-api:latest'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/appweld/appweld-worker:latest'
+timeout: '1800s'

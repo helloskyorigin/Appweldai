@@ -29,6 +29,15 @@
           }
         ]
       }
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "appweld-api",
+          "region": "asia-south1"
+        }
+      }
     ]
   }
 }
