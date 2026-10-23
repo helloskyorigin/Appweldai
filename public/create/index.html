@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#fafaf8" />
+  <meta name="description" content="Create your Android app identity from your existing website. No account required." />
+  <title>Create My App — Appweld</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/refinements.css" />
+  <link rel="stylesheet" href="/create/studio.css" />
+  <script src="/create/studio.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#studio-main">Skip to app designer</a>
+  <header class="site-header">
+    <div class="nav-inner wrap">
+      <a class="brand" href="/" aria-label="Appweld home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 10 16 5l8 5v12l-8 5-8-5V10Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="m8 10 8 5 8-5M16 15v12" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/></svg></span><span class="brand-word">appweld<span class="brand-stop">.</span></span></a>
+      <a class="studio-back" href="/">← Back to website</a>
+    </div>
+  </header>
+  <main class="studio-main" id="studio-main">
+    <div class="wrap studio-container">
+      <div class="studio-heading"><span class="kicker">THE APP STUDIO / 01</span><h1>Create your Android app.</h1><p>Start with your website. Make it feel like your brand. See the design update instantly — no account required.</p></div>
+      <div class="studio-progress" aria-label="App creation steps"><span class="current"><b>01</b> Customize</span><span><b>02</b> Check compatibility</span><span><b>03</b> Build & download</span></div>
+      <div class="studio-layout">
+        <section class="studio-settings" aria-labelledby="settings-heading">
+          <h2 id="settings-heading">Your app details</h2>
+          <p class="studio-hint">These settings stay in this browser session. Nothing is uploaded or saved to an account.</p>
+          <form id="studio-form" novalidate>
+            <div class="studio-field"><label for="website">Website URL</label><input id="website" name="website" type="url" inputmode="url" autocomplete="url" placeholder="https://yourwebsite.com" required /><small>Use a public HTTPS website that you own or have permission to convert.</small><p id="url-error" class="studio-error" aria-live="polite"></p></div>
+            <div class="studio-field"><label for="app-name">App name</label><input id="app-name" name="appName" type="text" maxlength="28" placeholder="My Android App" /><small>This appears beneath your app icon.</small></div>
+            <div class="studio-field"><label for="app-icon">App icon <span class="optional">optional</span></label><label class="studio-file" for="app-icon"><span class="upload-emblem">↑</span><span><b>Choose an image</b><small>PNG, JPG or WebP · up to 2 MB · stays on this device</small></span></label><input id="app-icon" name="icon" type="file" accept="image/png,image/jpeg,image/webp" /><p id="icon-error" class="studio-error" aria-live="polite"></p></div>
+            <div class="studio-field studio-color-field"><label for="splash-color">Splash background</label><div class="color-row"><input id="splash-color" name="color" type="color" value="#d8e6b5" /><span id="color-label">#D8E6B5</span></div></div>
+          </form>
+          <div class="studio-advisory"><b>Before you pay, check the fit.</b><p>Some sites need special handling for sign-in, payments, downloads or device permissions. A visual preview is not an Android compatibility test.</p></div>
+        </section>
+        <aside class="studio-output" aria-label="Android app design preview">
+          <div class="output-head"><span>LIVE BRAND PREVIEW</span><span class="output-live">● &nbsp; LOCAL ONLY</span></div>
+          <div class="studio-showcase" id="studio-showcase">
+            <div class="studio-handset"><div class="studio-camera"></div><div class="studio-screen"><div class="studio-status">9:41 <span>▰ ◢</span></div><div class="studio-splash"><div id="preview-icon" class="studio-icon">A</div><strong id="preview-name">My Android App</strong><span id="preview-domain">yourwebsite.com</span></div><div class="studio-home"></div></div></div>
+            <div class="studio-caption">App identity preview, not an APK</div>
+          </div>
+          <div class="studio-check"><div class="check-head"><b>Compatibility checklist</b><span>PRE-BUILD</span></div><p id="url-check">Enter a valid HTTPS URL to begin.</p><p><span class="status-neutral">!</span> Third-party login and payments require device testing.</p><p><span class="status-neutral">!</span> Google Play acceptance cannot be guaranteed.</p></div>
+          <div class="studio-notice"><b>Android builds are coming next.</b><p>Appweld's signed APK/AAB generation and $9 payment checkout are not enabled yet. This working designer is free; no payment is collected.</p></div>
+          <a class="studio-main-action" href="/legal/guide.html">Read the publishing guide <span>↗</span></a>
+        </aside>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer studio-footer"><div class="wrap footer-bottom"><span>© 2026 Appweld</span><div class="studio-footer-links"><a href="/legal/privacy.html">Privacy</a><a href="/legal/terms.html">Terms</a><a href="/legal/refunds.html">Refunds</a><a href="/legal/contact.html">Contact</a></div></div></footer>
+</body>
+</html>
